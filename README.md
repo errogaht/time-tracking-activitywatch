@@ -2,6 +2,20 @@
 
 A comprehensive time tracking and billing system with ActivityWatch integration.
 
+## Screenshots
+
+### Main Dashboard
+![Main Dashboard](screenshots/main-dashboard.png)
+*Client management, financial overview, and time entries in one view*
+
+### Add Time Entry
+![Add Time Entry](screenshots/add-time-entry.png)
+*Manual time entry and ActivityWatch import options*
+
+### Generate Bill
+![Generate Bill](screenshots/generate-bill.png)
+*Select time entries and generate invoices*
+
 ## Project Structure
 
 ```
