@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracking System</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Time Tracking System</h1>
+            <div class="client-selector">
+                <label for="clientSelect">Client:</label>
+                <select id="clientSelect">
+                    <option value="">Loading clients...</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Clients Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Clients</h2>
+                <button id="addClientBtn" class="btn btn-primary">+ Add Client</button>
+            </div>
+            <div id="clientsContainer" class="clients-grid">
+                <div class="loading">Loading clients...</div>
+            </div>
+        </section>
+
+        <!-- Balance Card -->
+        <section class="balance-card">
+            <h2>Financial Overview</h2>
+            <div class="balance-grid">
+                <div class="balance-item">
+                    <span class="label">Total Time Worked</span>
+                    <span class="value" id="totalTime">--h --m</span>
+                </div>
+                <div class="balance-item">
+                    <span class="label">Total Earned</span>
+                    <span class="value" id="totalEarned">₽0.00</span>
+                </div>
+                <div class="balance-item">
+                    <span class="label">Total Paid</span>
+                    <span class="value" id="totalPaid">₽0.00</span>
+                </div>
+                <div class="balance-item highlight">
+                    <span class="label">Current Balance</span>
+                    <span class="value" id="currentBalance">₽0.00</span>
+                </div>
+                <div class="balance-item">
+                    <span class="label">Unbilled Time</span>
+                    <span class="value" id="unbilledTime">--h --m</span>
+                </div>
+                <div class="balance-item">
+                    <span class="label">Unbilled Amount</span>
+                    <span class="value" id="unbilledAmount">₽0.00</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Time Entries Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Time Entries</h2>
+                <div class="section-controls">
+                    <input type="date" id="entriesDate" class="date-picker">
+                    <button id="addTimeEntryBtn" class="btn btn-primary">+ Add Time Entry</button>
+                </div>
+            </div>
+            <div id="timeEntriesContainer" class="entries-container">
+                <div class="loading">Loading time entries...</div>
+            </div>
+        </section>
+
+        <!-- Payments Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Payments</h2>
+                <button id="addPaymentBtn" class="btn btn-primary">+ Add Payment</button>
+            </div>
+            <div id="paymentsContainer" class="entries-container">
+                <div class="loading">Loading payments...</div>
+            </div>
+        </section>
+
+        <!-- Bills Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2>Bills</h2>
+                <button id="generateBillBtn" class="btn btn-primary">+ Generate Bill</button>
+            </div>
+            <div id="billsContainer" class="entries-container">
+                <div class="loading">Loading bills...</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Time Entry Modal -->
+    <div id="timeEntryModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Time Entry</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="manual">Manual Entry</button>
+                <button class="tab-btn" data-tab="activitywatch">ActivityWatch Import</button>
+            </div>
+
+            <!-- Manual Entry Tab -->
+            <div id="manual" class="tab-content active">
+                <form id="manualTimeForm">
+                    <div class="form-group">
+                        <label for="manualDate">Date:</label>
+                        <input type="date" id="manualDate" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="manualHours">Hours:</label>
+                            <input type="number" id="manualHours" min="0" max="23" value="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="manualMinutes">Minutes:</label>
+                            <input type="number" id="manualMinutes" min="0" max="59" value="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualNotes">Notes:</label>
+                        <textarea id="manualNotes" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Entry</button>
+                </form>
+            </div>
+
+            <!-- ActivityWatch Tab -->
+            <div id="activitywatch" class="tab-content">
+                <form id="activityWatchForm">
+                    <div class="form-group">
+                        <label for="awDate">Date:</label>
+                        <input type="date" id="awDate" required>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="awExcludeAfk" checked>
+                            Exclude AFK time
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="awRefreshBtn" class="btn btn-secondary">Refresh from ActivityWatch</button>
+                        <button type="submit" class="btn btn-primary">Import Entry</button>
+                    </div>
+                    <div id="awPreview" class="aw-preview"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Payment</h2>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="paymentType">Payment Type:</label>
+                    <select id="paymentType" required>
+                        <option value="money">Money</option>
+                        <option value="supplements">Supplements</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group" id="amountGroup">
+                    <label for="paymentAmount">Amount (₽):</label>
+                    <input type="number" id="paymentAmount" step="0.01" min="0">
+                </div>
+                <div class="form-group" id="descriptionGroup" style="display: none;">
+                    <label for="paymentDescription">Description:</label>
+                    <input type="text" id="paymentDescription">
+                </div>
+                <div class="form-group">
+                    <label for="paymentDate">Date:</label>
+                    <input type="date" id="paymentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentNotes">Notes:</label>
+                    <textarea id="paymentNotes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Generate Bill Modal -->
+    <div id="billModal" class="modal">
+        <div class="modal-content large">
+            <span class="close">&times;</span>
+            <h2>Generate Bill</h2>
+            <form id="billForm">
+                <div class="tabs">
+                    <button type="button" class="tab-btn active" data-tab="selectEntries">Select Entries</button>
+                    <button type="button" class="tab-btn" data-tab="dateRange">Date Range</button>
+                </div>
+
+                <!-- Select Entries Tab -->
+                <div id="selectEntries" class="tab-content active">
+                    <div class="form-group">
+                        <label>Unbilled Time Entries:</label>
+                        <div id="unbilledEntriesList" class="checkbox-list">
+                            <div class="loading">Loading unbilled entries...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Range Tab -->
+                <div id="dateRange" class="tab-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="billStartDate">Start Date:</label>
+                            <input type="date" id="billStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="billEndDate">End Date:</label>
+                            <input type="date" id="billEndDate">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Common fields -->
+                <div class="form-group">
+                    <label for="billType">Bill Type:</label>
+                    <select id="billType" required>
+                        <option value="invoice">Invoice</option>
+                        <option value="act">Act</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="billNotes">Notes:</label>
+                    <textarea id="billNotes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Generate Bill</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div id="clientModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="clientModalTitle">Add Client</h2>
+            <form id="clientForm">
+                <div class="form-group">
+                    <label for="clientName">Name: <span class="required">*</span></label>
+                    <input type="text" id="clientName" required placeholder="Client name">
+                </div>
+                <div class="form-group">
+                    <label for="clientHourlyRate">Hourly Rate (₽): <span class="required">*</span></label>
+                    <input type="number" id="clientHourlyRate" step="0.01" min="0" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="clientAwCategory">ActivityWatch Category:</label>
+                    <input type="text" id="clientAwCategory" placeholder="e.g., ExampleClient">
+                </div>
+                <div class="form-group">
+                    <label for="clientContactInfo">Contact Info:</label>
+                    <textarea id="clientContactInfo" rows="3" placeholder="Email, phone, address, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="clientNotes">Notes:</label>
+                    <textarea id="clientNotes" rows="3" placeholder="Additional information about the client"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Client</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
